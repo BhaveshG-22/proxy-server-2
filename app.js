@@ -46,4 +46,4 @@ proxy.on('proxyReq', (proxyReq, req, res) => {
 })
 
 
-app.listen(9001, () => console.log(`Reverse Proxy Running on port `));
+app.listen(process.env.PORT, () => console.log(`Reverse Proxy Running on port `));
