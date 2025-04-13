@@ -15,11 +15,17 @@ const BASE_PATH = process.env.BASE_PATH;
 const PRIMARY_DOMAIN = process.env.PRIMARY_DOMAIN || 'shipyard.bhaveshg.dev';
 
 
-// Root path handler with domain info
-app.get('/', (req, res) => {
-    const host = req.headers.host || 'unknown';
+app.use((req, res) => {
 
-    res.send(`
+
+
+    const hostHeader = req.headers['host'];
+    const subdomain = hostHeader ? hostHeader.split('.')[0] : 'default';
+
+
+    if (subdomain == hostHeader) {
+
+        res.send(`
       <html>
         <head>
           <title>Proxy Server Status</title>
@@ -32,8 +38,8 @@ app.get('/', (req, res) => {
         <body>
           <h1>Proxy Server Status</h1>
           <p class="status">Server is alive!</p>
-          <p>You accessed this server from: <strong>${host}</strong></p>
-          
+          <p>You accessed this server from: <strong>${hostHeader}</strong></p>
+
           <h2>How to use this proxy:</h2>
           <p>Access your project using the subdomain pattern: <pre><em>project-id</em>.${PRIMARY_DOMAIN}</pre></p>
           <p>For example: <pre>it-works-my-fam.${PRIMARY_DOMAIN}</pre></p>
@@ -41,14 +47,11 @@ app.get('/', (req, res) => {
         </body>
       </html>
     `);
-});
+    }
 
+    console.log('hostHeader--->', 'subdomain');
+    console.log(hostHeader, subdomain);
 
-app.use((req, res) => {
-
-
-    const hostHeader = req.headers['host'];
-    const subdomain = hostHeader ? hostHeader.split('.')[0] : 'default';
 
     console.log(subdomain);
 
@@ -66,12 +69,45 @@ app.use((req, res) => {
 
 proxy.on('proxyReq', (proxyReq, req, res) => {
     const url = req.url;
+    console.log('url');
+    console.log(url);
+
     if (url == '/') {
         proxyReq.path += 'index.html'
     }
 
     return proxyReq
 })
+
+
+
+// // Root path handler with domain info
+// app.get('/', (req, res , next) => {
+//     const host = req.headers.host || 'unknown';
+
+//     res.send(`
+//       <html>
+//         <head>
+//           <title>Proxy Server Status</title>
+//           <style>
+//             body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+//             pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+//             .status { color: green; font-weight: bold; }
+//           </style>
+//         </head>
+//         <body>
+//           <h1>Proxy Server Status</h1>
+//           <p class="status">Server is alive!</p>
+//           <p>You accessed this server from: <strong>${host}</strong></p>
+
+//           <h2>How to use this proxy:</h2>
+//           <p>Access your project using the subdomain pattern: <pre><em>project-id</em>.${PRIMARY_DOMAIN}</pre></p>
+//           <p>For example: <pre>it-works-my-fam.${PRIMARY_DOMAIN}</pre></p>
+//           <p>This will proxy to: <pre>${BASE_PATH}/it-works-my-fam/</pre></p>
+//         </body>
+//       </html>
+//     `);
+// });
 
 
 app.listen(port, () => console.log(`Reverse Proxy Running on port ${port}`));
